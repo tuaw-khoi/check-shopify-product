@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Shopify Price Checker</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__content">
+      <div class="brand-mark" aria-hidden="true">S</div>
+      <div>
+        <p class="eyebrow">LOCAL STORE AUDIT</p>
+        <h1>Shopify Price Checker</h1>
+        <p class="hero__copy">Quét thông tin sản phẩm, hình ảnh, giá từng variant và xuất snapshot Excel dễ dùng.</p>
+      </div>
+      <div class="privacy-pill"><span></span>Dữ liệu xử lý trên máy này</div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="panel connect-panel">
+      <div class="section-heading">
+        <div>
+          <span class="step">01</span>
+          <h2>Kết nối store</h2>
+        </div>
+        <p>Nhập domain hoặc URL theo đúng market bạn muốn kiểm tra.</p>
+      </div>
+      <form id="discover-form" class="url-form">
+        <label class="sr-only" for="store-url">URL Shopify store</label>
+        <input id="store-url" name="store_url" type="text" inputmode="url" autocomplete="url" placeholder="https://example.com hoặc example.com" required>
+        <button id="discover-button" class="button button--primary" type="submit">
+          <span class="button__label">Kiểm tra store</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    </section>
+
+    <section id="scope-panel" class="panel" hidden>
+      <div class="section-heading">
+        <div>
+          <span class="step">02</span>
+          <h2>Chọn phạm vi</h2>
+        </div>
+        <p>Để trống cả hai bộ lọc nếu muốn quét toàn bộ catalog.</p>
+      </div>
+
+      <div id="store-card" class="store-card"></div>
+      <div class="scope-grid">
+        <div class="field">
+          <label for="collections">Collections <span>có thể chọn nhiều</span></label>
+          <select id="collections" multiple size="7"></select>
+          <small>Dùng Ctrl hoặc Shift để chọn nhiều collection.</small>
+        </div>
+        <div class="field">
+          <label for="title-phrases">Cụm từ trong tên <span>OR</span></label>
+          <textarea id="title-phrases" rows="7" placeholder="Ví dụ:&#10;iPhone 16&#10;iPhone 17"></textarea>
+          <small>Mỗi dòng hoặc mỗi dấu phẩy là một cụm; không phân biệt hoa thường và dấu.</small>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="scan-button" class="button button--primary" type="button">Bắt đầu quét</button>
+        <button id="cancel-button" class="button button--danger" type="button" hidden>Hủy scan</button>
+      </div>
+    </section>
+
+    <section id="progress-panel" class="panel progress-panel" hidden aria-live="polite">
+      <div class="progress-copy">
+        <strong id="progress-message">Đang chuẩn bị…</strong>
+        <span id="progress-numbers">0 / 0</span>
+      </div>
+      <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+      <div class="progress-stats">
+        <span><b id="progress-discovered">0</b> tìm thấy</span>
+        <span><b id="progress-read">0</b> đã đọc</span>
+        <span><b id="progress-matched">0</b> khớp</span>
+        <span><b id="progress-errors">0</b> lỗi/cảnh báo</span>
+      </div>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="dashboard-heading">
+        <div>
+          <span class="step">03</span>
+          <h2>Snapshot hiện tại</h2>
+          <p id="snapshot-caption"></p>
+        </div>
+        <a id="export-button" class="button button--excel disabled" href="/api/scans/current/export.xlsx" download aria-disabled="true">Tải Excel</a>
+      </div>
+
+      <div id="kpi-grid" class="kpi-grid"></div>
+
+      <div class="chart-grid">
+        <article class="panel chart-card">
+          <h3>Phân bố giá</h3>
+          <canvas id="price-chart" width="720" height="260"></canvas>
+        </article>
+        <article class="panel chart-card">
+          <h3>Tồn hàng & giảm giá</h3>
+          <canvas id="status-chart" width="720" height="260"></canvas>
+        </article>
+      </div>
+
+      <section class="panel table-panel product-panel">
+        <div class="table-heading">
+          <div>
+            <h3>Danh mục sản phẩm</h3>
+            <p id="product-count">0 sản phẩm</p>
+          </div>
+          <button id="product-reset" class="button button--ghost" type="button">Xóa bộ lọc</button>
+        </div>
+
+        <div class="filters product-filters">
+          <label class="filter filter--wide">Tìm sản phẩm
+            <input id="product-search" type="search" placeholder="Tên, mô tả, tag, handle…">
+          </label>
+          <label class="filter">Collection
+            <select id="product-collection"><option value="">Tất cả</option></select>
+          </label>
+          <label class="filter">Vendor
+            <select id="product-vendor"><option value="">Tất cả</option></select>
+          </label>
+          <label class="filter">Product type
+            <select id="product-type"><option value="">Tất cả</option></select>
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table class="product-table">
+            <thead>
+              <tr>
+                <th>Ảnh</th><th>Sản phẩm</th><th>Mô tả</th><th>Vendor / Type</th><th>Tags / Collection</th>
+                <th>Variants / Ảnh</th><th class="numeric">Khoảng giá</th><th>Liên kết</th>
+              </tr>
+            </thead>
+            <tbody id="product-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <label>Hiển thị
+            <select id="product-page-size"><option selected>25</option><option>50</option><option>100</option></select>
+          </label>
+          <span id="product-page-info">Trang 1 / 1</span>
+          <div>
+            <button id="product-page-prev" class="icon-button" type="button" aria-label="Trang sản phẩm trước">←</button>
+            <button id="product-page-next" class="icon-button" type="button" aria-label="Trang sản phẩm sau">→</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="table-heading">
+          <div>
+            <h3>Chi tiết variants</h3>
+            <p id="table-count">0 kết quả</p>
+          </div>
+          <button id="reset-filters" class="button button--ghost" type="button">Xóa bộ lọc</button>
+        </div>
+
+        <div class="filters">
+          <label class="filter filter--wide">Tìm kiếm
+            <input id="filter-search" type="search" placeholder="Tên, variant, SKU, barcode, tag…">
+          </label>
+          <label class="filter">Collection
+            <select id="filter-collection"><option value="">Tất cả</option></select>
+          </label>
+          <label class="filter">Vendor
+            <select id="filter-vendor"><option value="">Tất cả</option></select>
+          </label>
+          <label class="filter">Product type
+            <select id="filter-type"><option value="">Tất cả</option></select>
+          </label>
+          <label class="filter">Tồn hàng
+            <select id="filter-stock">
+              <option value="">Tất cả</option>
+              <option value="available">Còn hàng</option>
+              <option value="unavailable">Hết hàng</option>
+              <option value="unknown">Không rõ</option>
+            </select>
+          </label>
+          <label class="filter">Giảm giá
+            <select id="filter-discount">
+              <option value="">Tất cả</option>
+              <option value="yes">Đang giảm</option>
+              <option value="no">Không giảm</option>
+            </select>
+          </label>
+          <label class="filter">Giá từ
+            <input id="filter-min" type="number" min="0" step="any" placeholder="0">
+          </label>
+          <label class="filter">Giá đến
+            <input id="filter-max" type="number" min="0" step="any" placeholder="Không giới hạn">
+          </label>
+          <label class="filter">Sắp xếp
+            <select id="filter-sort">
+              <option value="product-asc">Tên A → Z</option>
+              <option value="price-asc">Giá thấp → cao</option>
+              <option value="price-desc">Giá cao → thấp</option>
+              <option value="discount-desc">Giảm nhiều nhất</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sản phẩm</th><th>Variant / Options</th><th>SKU / Barcode</th><th>Collection</th>
+                <th class="numeric">Giá</th><th class="numeric">Compare-at</th><th class="numeric">Giảm</th>
+                <th>Tồn hàng</th><th>Vendor / Type</th><th>Liên kết</th>
+              </tr>
+            </thead>
+            <tbody id="variant-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <label>Hiển thị
+            <select id="page-size"><option>25</option><option selected>50</option><option>100</option></select>
+          </label>
+          <span id="page-info">Trang 1 / 1</span>
+          <div>
+            <button id="page-prev" class="icon-button" type="button" aria-label="Trang trước">←</button>
+            <button id="page-next" class="icon-button" type="button" aria-label="Trang sau">→</button>
+          </div>
+        </div>
+      </section>
+
+      <details id="error-panel" class="panel error-panel">
+        <summary><span>Lỗi và cảnh báo</span><b id="error-count">0</b></summary>
+        <div id="error-list" class="error-list"></div>
+      </details>
+    </section>
+  </main>
+
+  <dialog id="product-dialog" class="product-dialog">
+    <form method="dialog" class="dialog-close-row"><button class="dialog-close" type="submit" aria-label="Đóng">×</button></form>
+    <div id="product-dialog-content"></div>
+  </dialog>
+
+  <footer>Shopify Price Checker v1.1.0 · Snapshot công khai, không chỉnh sửa store.</footer>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

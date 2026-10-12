@@ -1,0 +1,19 @@
+# Local exports and logs
+*.xlsx
+*.xls
+*.csv
+*.log
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Go test/build scratch files
+*.test
+coverage.out
+
+# Local build artifacts
+shopify-price-checker.exe
