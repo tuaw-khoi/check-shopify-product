@@ -17,3 +17,4 @@ coverage.out
 
 # Local build artifacts
 shopify-price-checker.exe
+*.exe~

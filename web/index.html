@@ -14,7 +14,7 @@
       <div>
         <p class="eyebrow">LOCAL STORE AUDIT</p>
         <h1>Shopify Price Checker</h1>
-        <p class="hero__copy">Quét thông tin sản phẩm, hình ảnh, giá từng variant và xuất snapshot Excel dễ dùng.</p>
+        <p class="hero__copy">Quét thông tin sản phẩm, hình ảnh, giá từng variant và xuất Excel hoặc CSV để import vào Shopify.</p>
       </div>
       <div class="privacy-pill"><span></span>Dữ liệu xử lý trên máy này</div>
     </div>
@@ -89,7 +89,10 @@
           <h2>Snapshot hiện tại</h2>
           <p id="snapshot-caption"></p>
         </div>
-        <a id="export-button" class="button button--excel disabled" href="/api/scans/current/export.xlsx" download aria-disabled="true">Tải Excel</a>
+        <div class="export-actions">
+          <a id="export-button" class="button button--excel disabled" href="/api/scans/current/export.xlsx" download aria-disabled="true">Tải Excel phân tích</a>
+          <a id="shopify-export-button" class="button button--shopify disabled" href="/api/scans/current/export-shopify.csv" download aria-disabled="true">Tải CSV import Shopify</a>
+        </div>
       </div>
 
       <div id="kpi-grid" class="kpi-grid"></div>

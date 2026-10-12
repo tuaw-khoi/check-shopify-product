@@ -2,7 +2,7 @@ package main
 
 import "time"
 
-const appVersion = "1.1.0"
+const appVersion = "1.2.0"
 
 type CollectionRef struct {
 	Title  string `json:"title"`

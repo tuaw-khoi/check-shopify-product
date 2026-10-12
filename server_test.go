@@ -89,4 +89,13 @@ func TestAPIEndToEndAndExcelExport(t *testing.T) {
 	if export.Code != http.StatusOK || !bytes.HasPrefix(export.Body.Bytes(), []byte("PK")) {
 		t.Fatalf("export: status=%d type=%s bytes=%d", export.Code, export.Header().Get("Content-Type"), export.Body.Len())
 	}
+
+	shopifyExport := httptest.NewRecorder()
+	app.Handler().ServeHTTP(shopifyExport, localRequest(http.MethodGet, "http://127.0.0.1:8787/api/scans/current/export-shopify.csv", nil))
+	if shopifyExport.Code != http.StatusOK || !strings.HasPrefix(shopifyExport.Header().Get("Content-Type"), "text/csv") {
+		t.Fatalf("Shopify export: status=%d type=%s body=%s", shopifyExport.Code, shopifyExport.Header().Get("Content-Type"), shopifyExport.Body.String())
+	}
+	if !strings.HasPrefix(shopifyExport.Body.String(), "Title,URL handle,Description") || !strings.Contains(shopifyExport.Body.String(), "Điện thoại iPhone 16") {
+		t.Fatalf("Shopify export content invalid: %s", shopifyExport.Body.String())
+	}
 }

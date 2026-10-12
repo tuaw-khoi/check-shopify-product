@@ -49,6 +49,7 @@ func NewAppServer(guard URLGuard) (*AppServer, error) {
 	server.mux.HandleFunc("GET /api/scans/current", server.handleCurrentScan)
 	server.mux.HandleFunc("POST /api/scans/current/cancel", server.handleCancelScan)
 	server.mux.HandleFunc("GET /api/scans/current/export.xlsx", server.handleExport)
+	server.mux.HandleFunc("GET /api/scans/current/export-shopify.csv", server.handleShopifyExport)
 	server.mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(staticFS))))
 	server.mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
@@ -318,6 +319,30 @@ func (s *AppServer) handleExport(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(content)))
+	w.Write(content)
+}
+
+func (s *AppServer) handleShopifyExport(w http.ResponseWriter, _ *http.Request) {
+	s.mu.RLock()
+	job := s.job
+	s.mu.RUnlock()
+	if job == nil {
+		writeAPIError(w, http.StatusConflict, errors.New("chưa có snapshot để xuất"))
+		return
+	}
+	snapshot := job.snapshot()
+	if snapshot.Status != "completed" && snapshot.Status != "cancelled" {
+		writeAPIError(w, http.StatusConflict, errors.New("hãy chờ scan hoàn tất hoặc hủy scan trước khi xuất Shopify CSV"))
+		return
+	}
+	content, filename, err := BuildShopifyCSV(snapshot)
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(content)))
 	w.Write(content)

@@ -52,6 +52,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--green-bright); b
 .button--primary { background: var(--green); color: white; box-shadow: 0 8px 20px rgba(29,122,97,.2); }
 .button--danger { background: #fff0f1; color: var(--red); border: 1px solid #f4c7cb; }
 .button--excel { color: white; background: var(--navy); }
+.button--shopify { color: white; background: var(--green); box-shadow: 0 8px 20px rgba(29,122,97,.16); }
 .button--ghost { background: #eef3f5; color: var(--ink); min-height: 36px; }
 .spinner { display: none; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.45); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
 .loading .spinner { display: block; }
@@ -87,6 +88,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--green-bright); b
 
 .dashboard-heading { margin: 30px 0 18px; align-items: center; }
 .dashboard-heading p { flex-basis: 100%; margin-left: 41px; }
+.export-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
 .kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px; }
 .kpi { min-height: 112px; padding: 16px; border: 1px solid var(--line); background: var(--paper); border-radius: 14px; box-shadow: 0 8px 28px rgba(20,38,55,.045); }
 .kpi span { display: block; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .055em; }
@@ -209,4 +211,6 @@ footer { text-align: center; color: var(--muted); padding: 0 20px 35px; font-siz
   .product-meta, .product-gallery { grid-template-columns: 1fr; }
   .dashboard-heading { align-items: stretch; flex-direction: column; }
   .dashboard-heading p { margin-left: 0; }
+  .export-actions { justify-content: stretch; }
+  .export-actions .button { width: 100%; }
 }

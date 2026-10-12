@@ -19,7 +19,7 @@ const elements = {
   scanButton: $("#scan-button"), cancelButton: $("#cancel-button"), progressPanel: $("#progress-panel"),
   progressMessage: $("#progress-message"), progressNumbers: $("#progress-numbers"), progressBar: $("#progress-bar"),
   progressDiscovered: $("#progress-discovered"), progressRead: $("#progress-read"), progressMatched: $("#progress-matched"), progressErrors: $("#progress-errors"),
-  dashboard: $("#dashboard"), snapshotCaption: $("#snapshot-caption"), exportButton: $("#export-button"), kpiGrid: $("#kpi-grid"),
+  dashboard: $("#dashboard"), snapshotCaption: $("#snapshot-caption"), exportButton: $("#export-button"), shopifyExportButton: $("#shopify-export-button"), kpiGrid: $("#kpi-grid"),
   productBody: $("#product-body"), productCount: $("#product-count"), productReset: $("#product-reset"),
   productPageSize: $("#product-page-size"), productPageInfo: $("#product-page-info"), productPagePrev: $("#product-page-prev"), productPageNext: $("#product-page-next"),
   productDialog: $("#product-dialog"), productDialogContent: $("#product-dialog-content"),
@@ -143,7 +143,7 @@ async function pollScan() {
       elements.cancelButton.hidden = true;
       elements.cancelButton.disabled = false;
       if (snapshot.status === "failed") showNotice(snapshot.error || "Scan thất bại", "error");
-      if (snapshot.status === "completed") showNotice("Scan hoàn tất. Bạn có thể lọc kết quả hoặc tải Excel.", "success");
+      if (snapshot.status === "completed") showNotice("Scan hoàn tất. Bạn có thể tải Excel phân tích hoặc CSV để import vào Shopify.", "success");
     }
   } catch (error) {
     showNotice(error.message, "error");
@@ -176,6 +176,8 @@ function renderDashboard(snapshot) {
   elements.snapshotCaption.textContent = `${snapshot.store.name || "Store"} · ${currency} · ${finished}`;
   elements.exportButton.classList.toggle("disabled", !["completed", "cancelled"].includes(snapshot.status));
   elements.exportButton.setAttribute("aria-disabled", String(!["completed", "cancelled"].includes(snapshot.status)));
+  elements.shopifyExportButton.classList.toggle("disabled", !["completed", "cancelled"].includes(snapshot.status));
+  elements.shopifyExportButton.setAttribute("aria-disabled", String(!["completed", "cancelled"].includes(snapshot.status)));
 
   const kpis = [
     ["Products", summary.products || 0, `${summary.variants || 0} variants · ${summary.images || 0} ảnh`, ""],
